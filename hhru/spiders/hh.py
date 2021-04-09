@@ -1,7 +1,7 @@
 import re
 import scrapy
 
-from ..loaders import HhLoader
+from ..loaders import HhLoader, HhAuthorLoader
 
 class HhSpider(scrapy.Spider):
     name = 'hh'
@@ -19,7 +19,7 @@ class HhSpider(scrapy.Spider):
     _xpath_vacancy_selectors = {
         "name": "//div[contains(@class,'vacancy-title')]//h1[@data-qa='vacancy-title']/text()",
         "salary": "//div[contains(@class,'vacancy-title')]//p[contains(@class,'vacancy-salary')]/span/text()",
-        "desc": "//div[contains(@class,'vacancy-description')]/text()",
+        "desc": "//div[contains(@class,'vacancy-description')]/descendant::*/text()",
         "key_skills": "//div[contains(@data-qa,'skills-element')]//span/text()",
         "author_link": "//div[contains(@class,'vacancy-company__details')]//a[@data-qa='vacancy-company-name']/@href"
     }
@@ -28,7 +28,7 @@ class HhSpider(scrapy.Spider):
         "title": "//span[@data-qa='company-header-title-name']/text()",
         "link": "//a[@data-qa='sidebar-company-site']/@href",
         "work_spheres": "//div[contains(text(),'Сферы деятельности')]/following-sibling::p/text()",
-        "desc": "//div[@data-qa='company-description-text']/text()"
+        "desc": "//div[@data-qa='company-description-text']/descendant::*/text()"
     }
 
     def _get_follow_xpath(self, response, selector, callback, **kwargs):
@@ -72,7 +72,7 @@ class HhSpider(scrapy.Spider):
             return
         self.visited_urls.append(response.url)
 
-        loader = HhLoader(response=response)
+        loader = HhAuthorLoader(response=response)
         loader.add_value("url", response.url)
         for key, xpath in self._xpath_author_selectors.items():
             loader.add_xpath(key, xpath)
